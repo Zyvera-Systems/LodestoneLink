@@ -6,7 +6,13 @@ item:
     - "<#0C26FF>Left click on Lodestone to add location"
 
 crafting:
-  surround-item: DIAMOND # Item in crafting grid to put around normal compass
+  shape:
+    - "AAA"
+    - "ABA"
+    - "AAA"
+  ingredients:
+    A: DIAMOND
+    B: COMPASS
 
 menu:
   rows: 3
@@ -17,3 +23,6 @@ menu:
       - "X: {X}"
       - "Y: {Y}"
       - "Z: {Z}"
+
+messages:
+  not-exist-anymore: "<red>This waypoint got destroyed."

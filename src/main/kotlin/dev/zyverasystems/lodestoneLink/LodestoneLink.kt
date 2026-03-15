@@ -24,24 +24,45 @@ class LodestoneLink : JavaPlugin() {
         registerCrafting()
 
         server.pluginManager.registerEvents(AddWaystoneListener(), this)
-        server.pluginManager.registerEvents(ClickOpenListener(), this)
+        server.pluginManager.registerEvents(ClickOpenListener(this), this)
         server.pluginManager.registerEvents(NamedLodestoneManager(this), this)
-        server.pluginManager.registerEvents(MenuClickListener(), this)
+        server.pluginManager.registerEvents(MenuClickListener(this), this)
     }
 
     fun registerCrafting() {
-        val specialRounding = Material.valueOf(config.getStringNn("crafting.surround-item", "DIAMOND"))
+        val shape = ConfigUtil.config.getStringList("crafting.shape")
+            .map { it.padEnd(3, ' ').take(3) }
+
+        if (shape.size != 3) {
+            logger.warning("Invalid crafting recipe in config, crafting will not be possible")
+            return
+        }
+
+        val ingredients = ConfigUtil.config.getConfigurationSection("crafting.ingredients")?.getKeys(false)?.mapNotNull { key ->
+            Pair(key.first(), Material.matchMaterial(
+                ConfigUtil.config.getString("crafting.ingredients.$key") ?: "BARRIER"
+            ) ?: Material.BARRIER)
+        }
+
+        ingredients?.forEach { (char, mat) ->
+            if (mat == Material.BARRIER) {
+                logger.warning("Invalid crafting ingredient at char $char, crafting will not be possible")
+            }
+        }
+
         Bukkit.addRecipe(
             ShapedRecipe(
-                NamespacedKey(this, "compass"),
+                NamespacedKey(this, "custom_compass"),
                 SpecialCompass.item()
             ).shape(
-                "AAA",
-                "ABA",
-                "AAA"
-            )
-                .setIngredient('A', specialRounding)
-                .setIngredient('B', Material.COMPASS)
+                shape[0],
+                shape[1],
+                shape[2]
+            ).apply {
+                ingredients?.forEach { (char, mat) ->
+                    setIngredient(char, mat)
+                }
+            }
         )
     }
 }

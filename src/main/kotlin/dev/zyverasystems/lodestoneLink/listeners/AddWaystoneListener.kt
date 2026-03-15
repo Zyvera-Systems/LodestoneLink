@@ -18,6 +18,6 @@ class AddWaystoneListener : Listener {
         if (!e.action.isLeftClick) return
 
         val new = SpecialCompass.addLocationToItem(item, e.clickedBlock?.location) ?: return
-        e.player.inventory.setItem(e.player.inventory.heldItemSlot, new)
+        e.player.inventory.setItemInMainHand(new)
     }
 }

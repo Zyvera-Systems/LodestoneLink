@@ -1,5 +1,6 @@
 package dev.zyverasystems.lodestoneLink
 
+import dev.zyverasystems.lodestoneLink.util.ConfigUtil
 import dev.zyverasystems.lodestoneLink.util.ConfigUtil.getStringNn
 import dev.zyverasystems.lodestoneLink.util.LocationUtil
 import net.kyori.adventure.text.minimessage.MiniMessage
@@ -43,9 +44,24 @@ object SpecialCompass {
         val meta = item.itemMeta ?: return null
         if (!meta.persistentDataContainer.has(key)) return null
         val locations = getLocationsFromItem(item).toMutableList()
-        if (locations.size < 27) {
+        if (locations.size < ConfigUtil.config.getInt("menu.rows", 3) * 9) {
             locations.add(loc)
         }
+
+        meta.persistentDataContainer.set(key, PersistentDataType.STRING,
+            locations.toSet().joinToString(";") { location -> LocationUtil.serialize(location) })
+
+        item.setItemMeta(meta)
+
+        return item
+    }
+
+    fun removeLocationFromItem(itemFrom: ItemStack, loc: Location?): ItemStack? {
+        loc ?: return null
+        val item = itemFrom.clone()
+        val meta = item.itemMeta ?: return null
+        if (!meta.persistentDataContainer.has(key)) return null
+        val locations = getLocationsFromItem(item).minus(loc)
 
         meta.persistentDataContainer.set(key, PersistentDataType.STRING,
             locations.toSet().joinToString(";") { location -> LocationUtil.serialize(location) })

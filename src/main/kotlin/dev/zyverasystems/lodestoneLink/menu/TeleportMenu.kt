@@ -1,17 +1,19 @@
 package dev.zyverasystems.lodestoneLink.menu
 
+import com.cjcrafter.foliascheduler.FoliaCompatibility
 import dev.zyverasystems.lodestoneLink.SpecialCompass
 import dev.zyverasystems.lodestoneLink.util.ConfigUtil
 import dev.zyverasystems.lodestoneLink.util.ConfigUtil.getStringNn
 import dev.zyverasystems.lodestoneLink.util.NamedLodestoneManager
 import net.kyori.adventure.text.minimessage.MiniMessage
 import org.bukkit.Bukkit
+import org.bukkit.Location
 import org.bukkit.Material
+import org.bukkit.entity.ItemFrame
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
-import java.util.concurrent.CompletableFuture
-import com.cjcrafter.foliascheduler.FoliaCompatibility
 import org.bukkit.plugin.java.JavaPlugin
+import java.util.concurrent.CompletableFuture
 
 object TeleportMenu {
 
@@ -33,7 +35,8 @@ object TeleportMenu {
 
         CompletableFuture.allOf(*futures.toTypedArray()).thenAccept {
             val holder = MenuHolder()
-            val inv = Bukkit.createInventory(holder, ConfigUtil.config.getInt("menu.rows") * 9)
+            val inv =
+                Bukkit.createInventory(holder, ConfigUtil.config.getInt("menu.rows") * 9, compassItem.displayName())
 
             futures.forEachIndexed { i, future ->
                 val (loc, itemName) = future.join()
