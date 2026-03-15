@@ -1,0 +1,9 @@
+name: LodestoneLink
+version: '$version'
+main: dev.zyverasystems.lodestoneLink.LodestoneLink
+api-version: '1.21'
+prefix: LodestoneLink
+authors: [ Zyvera-Systems, thepixel3261 ]
+description: Link a special compass to lodestones for waystones!
+website: https://zyvera-systems.dev
+folia-supported: true

@@ -1,0 +1,19 @@
+lang: en_US
+item:
+  displayname: "<b><gradient:#FF0C0C:#9504FD:#00FF6E>Teleport Compass</gradient></b>"
+  lore:
+    - "<#0C26FF>Right click to open menu"
+    - "<#0C26FF>Left click on Lodestone to add location"
+
+crafting:
+  surround-item: DIAMOND # Item in crafting grid to put around normal compass
+
+menu:
+  rows: 3
+  item:
+    displayname: "<blue>Lodestone" # Fallback if Lodestone wasn't named
+    lore:
+      - "in {WORLD}"
+      - "X: {X}"
+      - "Y: {Y}"
+      - "Z: {Z}"
