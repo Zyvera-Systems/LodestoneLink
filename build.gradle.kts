@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "dev.zyverasystems"
-version = "1.0.0"
+version = "1.0.1"
 
 val minecraftApiVersion = "1.19.4-R0.1-SNAPSHOT"
 val foliaSchedulerVersion = "0.7.0"
