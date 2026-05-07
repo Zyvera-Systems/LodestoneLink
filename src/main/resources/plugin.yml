@@ -7,3 +7,13 @@ authors: [ Zyvera-Systems, thepixel3261 ]
 description: Link a special compass to lodestones for waystones!
 website: https://zyvera-systems.dev
 folia-supported: true
+permissions:
+  lodestonelink.use:
+    default: true
+    description: "Allows to use the item and teleport with it"
+  lodestonelink.add:
+    default: true
+    description: "Allows to add a lodestone to the item"
+  lodestonelink.craft:
+    default: true
+    description: "Allows to craft the item"

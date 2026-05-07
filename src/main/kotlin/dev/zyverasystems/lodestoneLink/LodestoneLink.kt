@@ -1,11 +1,11 @@
 package dev.zyverasystems.lodestoneLink
 
 import dev.zyverasystems.lodestoneLink.listeners.AddWaystoneListener
+import dev.zyverasystems.lodestoneLink.listeners.CancelCraftListener
 import dev.zyverasystems.lodestoneLink.listeners.ClickOpenListener
 import dev.zyverasystems.lodestoneLink.menu.MenuClickListener
 import dev.zyverasystems.lodestoneLink.menu.TeleportMenu
 import dev.zyverasystems.lodestoneLink.util.ConfigUtil
-import dev.zyverasystems.lodestoneLink.util.ConfigUtil.getStringNn
 import dev.zyverasystems.lodestoneLink.util.NamedLodestoneManager
 import org.bukkit.Bukkit
 import org.bukkit.Material
@@ -16,6 +16,7 @@ import org.bukkit.plugin.java.JavaPlugin
 class LodestoneLink : JavaPlugin() {
 
     override fun onEnable() {
+        instance = this
         saveDefaultConfig()
 
         ConfigUtil.init(this)
@@ -24,9 +25,10 @@ class LodestoneLink : JavaPlugin() {
         registerCrafting()
 
         server.pluginManager.registerEvents(AddWaystoneListener(), this)
-        server.pluginManager.registerEvents(ClickOpenListener(this), this)
-        server.pluginManager.registerEvents(NamedLodestoneManager(this), this)
+        server.pluginManager.registerEvents(ClickOpenListener(), this)
+        server.pluginManager.registerEvents(NamedLodestoneManager(), this)
         server.pluginManager.registerEvents(MenuClickListener(this), this)
+        server.pluginManager.registerEvents(CancelCraftListener(), this)
     }
 
     fun registerCrafting() {
@@ -38,11 +40,14 @@ class LodestoneLink : JavaPlugin() {
             return
         }
 
-        val ingredients = ConfigUtil.config.getConfigurationSection("crafting.ingredients")?.getKeys(false)?.mapNotNull { key ->
-            Pair(key.first(), Material.matchMaterial(
-                ConfigUtil.config.getString("crafting.ingredients.$key") ?: "BARRIER"
-            ) ?: Material.BARRIER)
-        }
+        val ingredients =
+            ConfigUtil.config.getConfigurationSection("crafting.ingredients")?.getKeys(false)?.mapNotNull { key ->
+                Pair(
+                    key.first(), Material.matchMaterial(
+                        ConfigUtil.config.getString("crafting.ingredients.$key") ?: "BARRIER"
+                    ) ?: Material.BARRIER
+                )
+            }
 
         ingredients?.forEach { (char, mat) ->
             if (mat == Material.BARRIER) {
@@ -64,5 +69,9 @@ class LodestoneLink : JavaPlugin() {
                 }
             }
         )
+    }
+
+    companion object {
+        lateinit var instance: LodestoneLink private set
     }
 }

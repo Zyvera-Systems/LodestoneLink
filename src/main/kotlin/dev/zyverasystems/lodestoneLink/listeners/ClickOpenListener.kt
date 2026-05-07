@@ -1,22 +1,24 @@
 package dev.zyverasystems.lodestoneLink.listeners
 
 import com.cjcrafter.foliascheduler.FoliaCompatibility
+import dev.zyverasystems.lodestoneLink.LodestoneLink
 import dev.zyverasystems.lodestoneLink.SpecialCompass
 import dev.zyverasystems.lodestoneLink.menu.TeleportMenu
 import org.bukkit.Material
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerInteractEvent
-import org.bukkit.plugin.java.JavaPlugin
 
-class ClickOpenListener(private val plugin: JavaPlugin) : Listener {
-    val schedler = FoliaCompatibility(plugin).serverImplementation
+class ClickOpenListener : Listener {
+    val schedler = FoliaCompatibility(LodestoneLink.instance).serverImplementation
 
     @EventHandler
     fun onClickOpen(e: PlayerInteractEvent) {
         if (!e.action.isRightClick) return
         val item = e.item ?: return
         if (!SpecialCompass.isItem(item)) return
+
+        if (!e.player.hasPermission("lodestonelink.use")) return
 
         SpecialCompass.getLocationsFromItem(item).forEach { loc ->
             schedler.region(loc).run(Runnable {

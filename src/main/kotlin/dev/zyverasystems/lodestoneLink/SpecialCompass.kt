@@ -7,6 +7,7 @@ import net.kyori.adventure.text.minimessage.MiniMessage
 import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
+import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import org.bukkit.persistence.PersistentDataType
 import org.bukkit.plugin.java.JavaPlugin
@@ -25,11 +26,18 @@ object SpecialCompass {
         val item = ItemStack(Material.COMPASS)
         val meta = item.itemMeta
 
-        meta.displayName(mm.deserialize(plugin.config.getStringNn("item.displayname", "<red>MISSING CONFIG VALUE FOR: <yellow>item.displayname")))
+        meta.displayName(
+            mm.deserialize(
+                plugin.config.getStringNn(
+                    "item.displayname",
+                    "<red>MISSING CONFIG VALUE FOR: <yellow>item.displayname"
+                )
+            )
+        )
         meta.lore(plugin.config.getStringList("item.lore").mapNotNull { mm.deserialize(it) })
 
         val data = meta.persistentDataContainer
-        data.set(key, PersistentDataType.STRING, "")
+        data[key, PersistentDataType.STRING] = ""
         item.itemMeta = meta
         return item
     }
@@ -38,7 +46,7 @@ object SpecialCompass {
         return item.itemMeta.persistentDataContainer.has(key)
     }
 
-    fun addLocationToItem(itemFrom: ItemStack, loc: Location?): ItemStack? {
+    fun addLocationToItem(itemFrom: ItemStack, loc: Location?, player: Player): ItemStack? {
         loc ?: return null
         val item = itemFrom.clone()
         val meta = item.itemMeta ?: return null
@@ -46,10 +54,12 @@ object SpecialCompass {
         val locations = getLocationsFromItem(item).toMutableList()
         if (locations.size < ConfigUtil.config.getInt("menu.rows", 3) * 9) {
             locations.add(loc)
+        } else {
+            player.sendMessage(mm.deserialize(ConfigUtil.config.getStringNn("messages.max")))
         }
 
-        meta.persistentDataContainer.set(key, PersistentDataType.STRING,
-            locations.toSet().joinToString(";") { location -> LocationUtil.serialize(location) })
+        meta.persistentDataContainer[key, PersistentDataType.STRING] =
+            locations.toSet().joinToString(";") { location -> LocationUtil.serialize(location) }
 
         item.setItemMeta(meta)
 
@@ -63,8 +73,8 @@ object SpecialCompass {
         if (!meta.persistentDataContainer.has(key)) return null
         val locations = getLocationsFromItem(item).minus(loc)
 
-        meta.persistentDataContainer.set(key, PersistentDataType.STRING,
-            locations.toSet().joinToString(";") { location -> LocationUtil.serialize(location) })
+        meta.persistentDataContainer[key, PersistentDataType.STRING] =
+            locations.toSet().joinToString(";") { location -> LocationUtil.serialize(location) }
 
         item.setItemMeta(meta)
 
@@ -74,7 +84,7 @@ object SpecialCompass {
     fun getLocationsFromItem(item: ItemStack): List<Location> {
         val meta = item.itemMeta ?: return listOf()
 
-        val rawData = meta.persistentDataContainer.get(key, PersistentDataType.STRING)
+        val rawData = meta.persistentDataContainer[key, PersistentDataType.STRING]
 
         if (rawData.isNullOrEmpty()) {
             return listOf()

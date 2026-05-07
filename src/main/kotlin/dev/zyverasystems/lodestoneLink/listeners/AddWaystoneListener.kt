@@ -16,8 +16,9 @@ class AddWaystoneListener : Listener {
         if (e.clickedBlock?.type != Material.LODESTONE) return
         e.isCancelled = true
         if (!e.action.isLeftClick) return
+        if (!e.player.hasPermission("lodestonelink.add")) return
 
-        val new = SpecialCompass.addLocationToItem(item, e.clickedBlock?.location) ?: return
+        val new = SpecialCompass.addLocationToItem(item, e.clickedBlock?.location, e.player) ?: return
         e.player.inventory.setItemInMainHand(new)
     }
 }
