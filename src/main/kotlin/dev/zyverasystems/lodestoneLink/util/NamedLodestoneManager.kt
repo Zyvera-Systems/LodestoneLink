@@ -1,27 +1,24 @@
 package dev.zyverasystems.lodestoneLink.util
 
+import com.cjcrafter.foliascheduler.FoliaCompatibility
+import dev.zyverasystems.lodestoneLink.LodestoneLink
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer
 import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.block.Block
+import org.bukkit.entity.ItemFrame
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.block.BlockBreakEvent
 import org.bukkit.event.block.BlockPlaceEvent
 import org.bukkit.inventory.ItemStack
 import org.bukkit.persistence.PersistentDataType
-import org.bukkit.plugin.java.JavaPlugin
-import com.cjcrafter.foliascheduler.FoliaCompatibility
 import java.util.concurrent.CompletableFuture
 
 
-class NamedLodestoneManager(plugin: JavaPlugin) : Listener {
-    init {
-        init(plugin)
-    }
-
+class NamedLodestoneManager : Listener {
     @EventHandler
     fun onLodestonePlace(event: BlockPlaceEvent) {
         val block = event.blockPlaced
@@ -39,7 +36,7 @@ class NamedLodestoneManager(plugin: JavaPlugin) : Listener {
             val chunk = block.chunk
             val pdc = chunk.persistentDataContainer
 
-            pdc.set(getBlockKey(block), PersistentDataType.STRING, serializedName)
+            pdc[getBlockKey(block), PersistentDataType.STRING] = serializedName
         }
     }
 
@@ -54,9 +51,8 @@ class NamedLodestoneManager(plugin: JavaPlugin) : Listener {
         val key = getBlockKey(block)
 
         if (pdc.has(key, PersistentDataType.STRING)) {
-            val serializedName = pdc.get(key, PersistentDataType.STRING)
+            val serializedName = pdc[key, PersistentDataType.STRING]
             val nameComponent = GsonComponentSerializer.gson().deserialize(serializedName!!)
-
 
             event.isDropItems = false
             val dropItem = ItemStack(Material.LODESTONE)
@@ -70,20 +66,14 @@ class NamedLodestoneManager(plugin: JavaPlugin) : Listener {
     }
 
     companion object {
-        private lateinit var plugin: JavaPlugin
-
-        fun init(plugin: JavaPlugin) {
-            this.plugin = plugin
-        }
-
         private fun getBlockKey(block: Block): NamespacedKey {
-            return NamespacedKey(plugin, "lodestone_" + block.x + "_" + block.y + "_" + block.z)
+            return NamespacedKey(LodestoneLink.instance, "lodestone_" + block.x + "_" + block.y + "_" + block.z)
         }
 
-        fun getLodestoneName(loc: Location): CompletableFuture<Component?> {
-            val future = CompletableFuture<Component?>()
+        fun getLodestoneDisplay(loc: Location): CompletableFuture<Pair<Component?, Material?>?> {
+            val future = CompletableFuture<Pair<Component?, Material?>?>()
 
-            FoliaCompatibility(plugin).serverImplementation.region(loc).run (Runnable {
+            FoliaCompatibility(LodestoneLink.instance).serverImplementation.region(loc).run(Runnable {
                 val block = loc.block
 
                 if (block.type != Material.LODESTONE) {
@@ -91,15 +81,34 @@ class NamedLodestoneManager(plugin: JavaPlugin) : Listener {
                     return@Runnable
                 }
 
+                if ((loc.clone().add(0.0, 1.0, 0.0).block.type != Material.AIR && loc.clone()
+                        .add(0.0, 1.0, 0.0).block.type != Material.ITEM_FRAME)
+                    || loc.clone().add(0.0, 2.0, 0.0).block.type != Material.AIR
+                ) {
+                    future.complete(null)
+                    return@Runnable
+                }
+
                 val chunk = loc.chunk
                 val pdc = chunk.persistentDataContainer
                 val key = getBlockKey(block)
+                val itemFrame = try {
+                    loc.clone().add(0.0, 1.0, 0.0).getNearbyEntities(1.0, 1.0, 1.0)
+                        .first { it is ItemFrame } as? ItemFrame
+                } catch (_: NoSuchElementException) {
+                    null
+                }
+                val displayMaterial = if (itemFrame == null || itemFrame.item.type == Material.AIR) {
+                    null
+                } else {
+                    itemFrame.item.type
+                }
 
                 if (pdc.has(key, PersistentDataType.STRING)) {
-                    val serializedName = pdc.get(key, PersistentDataType.STRING)
-                    future.complete(GsonComponentSerializer.gson().deserialize(serializedName!!))
+                    val serializedName = pdc[key, PersistentDataType.STRING]
+                    future.complete(Pair(GsonComponentSerializer.gson().deserialize(serializedName!!), displayMaterial))
                 } else {
-                    future.complete(null)
+                    future.complete(Pair(null, displayMaterial))
                 }
             })
 

@@ -1,5 +1,7 @@
 package dev.zyverasystems.lodestoneLink.util
 
+import dev.zyverasystems.lodestoneLink.util.LocationUtil.deserialize
+import dev.zyverasystems.lodestoneLink.util.LocationUtil.serialize
 import org.bukkit.Bukkit
 import org.bukkit.Location
 

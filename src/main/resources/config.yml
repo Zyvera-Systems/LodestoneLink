@@ -1,4 +1,3 @@
-lang: en_US
 item:
   displayname: "<b><gradient:#FF0C0C:#9504FD:#00FF6E>Teleport Compass</gradient></b>"
   lore:
@@ -25,4 +24,5 @@ menu:
       - "Z: {Z}"
 
 messages:
-  not-exist-anymore: "<red>This waypoint got destroyed."
+  unsafe: "<red>This waypoint is unsafe to teleport to."
+  max: "<red>This teleport compass has reached the limit."

@@ -7,6 +7,9 @@ plugins {
 group = "dev.zyverasystems"
 version = "1.0.0"
 
+val minecraftApiVersion = "1.19.4-R0.1-SNAPSHOT"
+val foliaSchedulerVersion = "0.7.0"
+
 repositories {
     mavenCentral()
     maven("https://repo.papermc.io/repository/maven-public/") {
@@ -15,9 +18,9 @@ repositories {
 }
 
 dependencies {
-    compileOnly("io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT")
+    compileOnly("io.papermc.paper:paper-api:$minecraftApiVersion")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
-    implementation("com.cjcrafter:foliascheduler:0.7.0")
+    implementation("com.cjcrafter:foliascheduler:$foliaSchedulerVersion")
 }
 
 tasks {
@@ -29,17 +32,13 @@ tasks {
     }
 }
 
-val targetJavaVersion = 21
+val targetJavaVersion = 17
 kotlin {
     jvmToolchain(targetJavaVersion)
 }
 
 tasks.build {
     dependsOn("shadowJar")
-}
-
-tasks.shadowJar {
-    archiveClassifier = ""
 }
 
 tasks.processResources {
@@ -49,4 +48,8 @@ tasks.processResources {
     filesMatching("plugin.yml") {
         expand(props)
     }
+}
+
+tasks.shadowJar {
+    archiveClassifier = ""
 }

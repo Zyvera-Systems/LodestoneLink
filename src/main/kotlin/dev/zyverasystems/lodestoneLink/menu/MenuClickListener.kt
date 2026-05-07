@@ -3,7 +3,6 @@ package dev.zyverasystems.lodestoneLink.menu
 import com.cjcrafter.foliascheduler.FoliaCompatibility
 import dev.zyverasystems.lodestoneLink.util.ConfigUtil
 import dev.zyverasystems.lodestoneLink.util.ConfigUtil.getStringNn
-import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.minimessage.MiniMessage
 import org.bukkit.Material
 import org.bukkit.event.EventHandler
@@ -13,20 +12,23 @@ import org.bukkit.plugin.java.JavaPlugin
 
 class MenuClickListener(plugin: JavaPlugin) : Listener {
     private val scheduler = FoliaCompatibility(plugin).serverImplementation
+
     @EventHandler
     fun onClick(e: InventoryClickEvent) {
-        val holder = e.clickedInventory?.holder as? MenuHolder ?: return
+        val holder = e.inventory.holder as? MenuHolder ?: return
         e.isCancelled = true
         val loc = holder.getLocation(e.slot) ?: return
         scheduler.region(loc).execute(Runnable {
             if (loc.block.type != Material.LODESTONE) {
-                e.whoClicked.sendMessage(MiniMessage.miniMessage().deserialize(ConfigUtil.config.getStringNn("messages.not-exist-anymore")))
+                e.whoClicked.sendMessage(
+                    MiniMessage.miniMessage().deserialize(ConfigUtil.config.getStringNn("messages.unsafe"))
+                )
                 e.whoClicked.closeInventory()
                 return@Runnable
             }
 
             if (!e.whoClicked.isOnGround) return@Runnable
-            e.whoClicked.teleportAsync(loc.add(0.5, 1.0, 0.5))
+            e.whoClicked.teleportAsync(loc.clone().add(0.5, 1.0, 0.5))
             e.whoClicked.closeInventory()
         })
     }
