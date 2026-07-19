@@ -81,7 +81,7 @@ class NamedLodestoneManager : Listener {
                     return@Runnable
                 }
 
-                if (loc.clone().add(0.0, 1.0, 0.0).block.type.isAir || loc.clone().add(0.0, 2.0, 0.0).block.type.isAir) {
+                if (!loc.clone().add(0.0, 1.0, 0.0).block.type.isAir || !loc.clone().add(0.0, 2.0, 0.0).block.type.isAir) {
                     future.complete(null)
                     return@Runnable
                 }
